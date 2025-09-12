@@ -1,0 +1,44 @@
+/* AI related styles */
+.ai-badge {
+    background-color: var(--accent);
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.message.ai-message {
+    border-left: 3px solid #00bfa5;
+    background-color: rgba(0, 191, 165, 0.05);
+}
+
+.ai-indicator {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #00bfa5;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.ai-toggle-container {
+    display: flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    user-select: none;
+}
+
+.ai-toggle-container label {
+    margin-left: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.ai-toggle-container input {
+    width: auto;
+    flex: 0;
+}
