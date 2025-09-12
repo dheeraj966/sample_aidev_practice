@@ -8,20 +8,68 @@
         /* Basic styling to make sure CSS is working */
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
             background-color: #121212;
             color: white;
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #1e1e1e;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #new-chat-btn {
+            margin-bottom: 15px;
+            background-color: #6200ee;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #chat-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+        }
+
+        #chat-list li {
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        #chat-list li:hover {
+            background-color: #2d2d2d;
+        }
+        
+        #chat-list li.active {
+            background-color: #6200ee;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
         }
         
         .message-container {
             background-color: #1e1e1e;
             border-radius: 8px;
             padding: 15px;
-            margin-bottom: 20px;
-            min-height: 200px;
-            max-height: 60vh;
+            margin-bottom: 15px;
+            flex: 1;
             overflow-y: auto;
         }
         
@@ -82,20 +130,28 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-    <h1>Message Board with AI</h1>
-    
-    <div id="messages" class="message-container">
-        <!-- Messages will appear here -->
+    <div class="sidebar">
+        <button id="new-chat-btn">New Chat</button>
+        <ul id="chat-list">
+            <!-- Chat list will be populated here -->
+        </ul>
     </div>
-    
-    <form id="message-form">
-        <input type="text" id="message-input" placeholder="Type your message..." required>
-        <div class="checkbox-container">
-            <input type="checkbox" id="ask-ai" checked>
-            <label for="ask-ai">Ask AI</label>
+    <div class="main-content">
+        <h1>Message Board with AI</h1>
+        
+        <div id="messages" class="message-container">
+            <!-- Messages will appear here -->
         </div>
-        <button type="submit">Send</button>
-    </form>
+        
+        <form id="message-form">
+            <input type="text" id="message-input" placeholder="Type your message..." required>
+            <div class="checkbox-container">
+                <input type="checkbox" id="ask-ai" checked>
+                <label for="ask-ai">Ask AI</label>
+            </div>
+            <button type="submit">Send</button>
+        </form>
+    </div>
     
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

@@ -3,11 +3,80 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageInput = document.getElementById('message-input');
     const askAiCheckbox = document.getElementById('ask-ai');
     const messagesContainer = document.getElementById('messages');
+    const newChatBtn = document.getElementById('new-chat-btn');
+    const chatList = document.getElementById('chat-list');
 
-    // Function to fetch messages
-    async function fetchMessages() {
+    let currentChatId = null;
+    let chats = [];
+
+    // Function to fetch chats
+    async function fetchChats() {
         try {
-            const response = await fetch('/api/messages');
+            const response = await fetch('/api/chats');
+            if (!response.ok) {
+                throw new Error('Failed to fetch chats');
+            }
+            chats = await response.json();
+            renderChatList();
+            if (chats.length > 0) {
+                // Select the first chat by default
+                if (!currentChatId) {
+                    switchChat(chats[0]);
+                }
+            } else {
+                // If there are no chats, create a new one
+                createNewChat();
+            }
+        } catch (error) {
+            console.error('Error fetching chats:', error);
+        }
+    }
+
+    // Function to render the chat list
+    function renderChatList() {
+        chatList.innerHTML = '';
+        chats.forEach(chatId => {
+            const li = document.createElement('li');
+            li.textContent = `Chat ${chatId.substring(0, 8)}...`;
+            li.dataset.chatId = chatId;
+            if (chatId === currentChatId) {
+                li.classList.add('active');
+            }
+            li.addEventListener('click', () => switchChat(chatId));
+            chatList.appendChild(li);
+        });
+    }
+
+    // Function to switch chat
+    function switchChat(chatId) {
+        currentChatId = chatId;
+        messagesContainer.innerHTML = ''; // Clear messages
+        fetchMessages();
+        renderChatList(); // Re-render to update active class
+    }
+
+    // Function to create a new chat
+    async function createNewChat() {
+        try {
+            const response = await fetch('/api/chats', { method: 'POST' });
+            if (!response.ok) {
+                throw new Error('Failed to create new chat');
+            }
+            const data = await response.json();
+            const newChatId = data.chat_id;
+            chats.push(newChatId);
+            switchChat(newChatId);
+        } catch (error)
+        {
+            console.error('Error creating new chat:', error);
+        }
+    }
+
+    // Function to fetch messages for the current chat
+    async function fetchMessages() {
+        if (!currentChatId) return;
+        try {
+            const response = await fetch(`/api/messages/${currentChatId}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch messages');
             }
@@ -20,27 +89,63 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to render messages
     function renderMessages(messages) {
-        // Get existing message IDs
-        const existingIds = new Set(
-            Array.from(messagesContainer.children)
-                .map(element => element.dataset.id)
-        );
-
-        // Add only new messages
+        messagesContainer.innerHTML = ''; // Clear existing messages
         messages.forEach(message => {
-            if (!existingIds.has(message.id)) {
+            const messageElement = document.createElement('div');
+            messageElement.className = message.is_ai ? 'message ai-message' : 'message';
+            
+            if (message.is_ai) {
+                const aiIndicator = document.createElement('div');
+                aiIndicator.className = 'ai-indicator';
+                aiIndicator.textContent = 'AI';
+                messageElement.appendChild(aiIndicator);
+            }
+            
+            const textElement = document.createElement('div');
+            if (message.is_ai) {
+                textElement.innerHTML = marked.parse(message.text);
+            } else {
+                textElement.textContent = message.text;
+            }
+            messageElement.appendChild(textElement);
+            
+            messagesContainer.appendChild(messageElement);
+        });
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Function to send a message
+    async function sendMessage(text, askAi) {
+        if (!currentChatId) return;
+        try {
+            const response = await fetch(`/api/messages/${currentChatId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    text: text,
+                    ask_ai: askAi
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to send message');
+            }
+            
+            const newMessages = await response.json();
+            // Append new messages to the current view
+            newMessages.forEach(message => {
                 const messageElement = document.createElement('div');
                 messageElement.className = message.is_ai ? 'message ai-message' : 'message';
-                messageElement.dataset.id = message.id;
-
-                // Add AI indicator if it's an AI message
+                
                 if (message.is_ai) {
                     const aiIndicator = document.createElement('div');
                     aiIndicator.className = 'ai-indicator';
                     aiIndicator.textContent = 'AI';
                     messageElement.appendChild(aiIndicator);
                 }
-
+                
                 const textElement = document.createElement('div');
                 if (message.is_ai) {
                     textElement.innerHTML = marked.parse(message.text);
@@ -48,62 +153,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     textElement.textContent = message.text;
                 }
                 messageElement.appendChild(textElement);
-
+                
                 messagesContainer.appendChild(messageElement);
-
-                // Scroll to bottom
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-        });
-    }
-
-    // Function to send a message
-    async function sendMessage(text, askAi) {
-        try {
-            console.log(`Sending message: "${text}", ask_ai: ${askAi}`);
-
-            const response = await fetch('/api/messages', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    text: text,
-                    ask_ai: askAi
-                })
             });
-
-            console.log(`Response status: ${response.status}`);
-
-            if (!response.ok) {
-                throw new Error('Failed to send message');
-            }
-
-            const messages = await response.json();
-            console.log(`Received ${messages.length} messages:`, messages);
-            renderMessages(messages);
-
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
         } catch (error) {
             console.error('Error sending message:', error);
         }
     }
 
     // Initial fetch
-    fetchMessages();
+    fetchChats();
 
-    // Form submission
+    // Event Listeners
+    newChatBtn.addEventListener('click', createNewChat);
+
     messageForm.addEventListener('submit', function(event) {
         event.preventDefault();
-
+        
         const text = messageInput.value.trim();
         if (!text) return;
-
+        
         const askAi = askAiCheckbox.checked;
-
+        
         messageInput.value = '';
         sendMessage(text, askAi);
     });
-
-    // Poll for new messages
-    setInterval(fetchMessages, 6000);
 });

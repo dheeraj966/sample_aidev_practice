@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "install": "npm install && pip install -r requirements.txt",
-    "dev": "python app.py",
+    "dev": ".\\.venv\\Scripts\\python.exe app.py",
     "frontend": "vite"
   },
   "devDependencies": {
