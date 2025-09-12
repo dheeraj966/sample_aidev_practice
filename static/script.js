@@ -44,7 +44,14 @@ document.addEventListener('DOMContentLoaded', function() {
         currentChatId = chatId;
         messagesContainer.innerHTML = ''; // Clear messages
         fetchMessages();
-        renderChatList(); // Re-render to update active class
+
+        // Move the switched chat to the top of the chats array
+        const index = chats.indexOf(chatId);
+        if (index > -1) {
+            chats.splice(index, 1);
+            chats.unshift(chatId);
+        }
+        renderChatList(); // Re-render to update active class and order
     }
 
     // Function to create a new chat
@@ -56,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const data = await response.json();
             const newChatId = data.chat_id;
-            chats.push(newChatId);
+            chats.unshift(newChatId);
             switchChat(newChatId);
         } catch (error)
         {
