@@ -4,11 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "predev": "npm install && pip install -r requirements.txt",
-    "dev": "concurrently \"npm run flask\" \"vite\"",
-    "build": "vite build",
-    "preview": "vite preview",
-    "flask": "python app.py"
+    "install": "npm install && pip install -r requirements.txt",
+    "frontend": "vite",
+    "backend": "python app.py"
   },
   "devDependencies": {
     "concurrently": "^7.6.0",
