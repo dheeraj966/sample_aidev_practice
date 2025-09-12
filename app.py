@@ -1,15 +1,16 @@
 import sys
 import os
-import csv
-from datetime import datetime
-import uuid
-from flask import Flask, request, jsonify, render_template
-from ai.client import AIClient
-from dotenv import load_dotenv
 
 # Add the project root to the Python path
 project_root = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, project_root)
+
+from flask import Flask, request, jsonify, render_template
+from datetime import datetime
+import uuid
+from ai.client import AIClient
+import os
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -20,21 +21,6 @@ messages = []
 
 # Initialize AI client
 ai_client = AIClient(api_key=os.getenv("GEMINI_API_KEY"))
-
-# CSV Logging setup
-CSV_FILE = 'data.csv'
-CSV_HEADER = ['timestamp', 'is_ai', 'text']
-
-# Create the CSV file with header if it doesn't exist
-if not os.path.exists(CSV_FILE):
-    with open(CSV_FILE, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(CSV_HEADER)
-
-def write_to_csv(data):
-    with open(CSV_FILE, 'a', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(data)
 
 @app.route('/')
 def index():
@@ -59,7 +45,6 @@ def add_message():
     }
     
     messages.append(user_message)
-    write_to_csv([user_message['timestamp'], user_message['is_ai'], user_message['text']])
     response_messages = [user_message]
     
     # Check if AI should respond
@@ -81,7 +66,6 @@ def add_message():
             }
             
             messages.append(ai_message)
-            write_to_csv([ai_message['timestamp'], ai_message['is_ai'], ai_message['text']])
             response_messages.append(ai_message)
             
         except Exception as e:
