@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "install": "npm install && pip install -r requirements.txt",
-    "frontend": "vite",
-    "backend": "python app.py"
+    "dev": "python app.py",
+    "frontend": "vite"
   },
   "devDependencies": {
     "concurrently": "^7.6.0",
