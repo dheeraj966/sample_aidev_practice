@@ -78,17 +78,9 @@ def write_to_csv(data):
         writer = csv.writer(f)
         writer.writerow(data)
 
-def save_chats_to_csv_on_exit():
-    print("Saving all chats to CSV before exit...")
-    with open(CSV_FILE, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(CSV_HEADER)
-        for chat_id, messages in chats.items():
-            for msg in messages:
-                writer.writerow([chat_id, msg['timestamp'], msg['is_ai'], msg['text']])
-    print("Chats saved.")
 
-atexit.register(save_chats_to_csv_on_exit)
+
+
 
 @app.route('/')
 def index():
@@ -127,7 +119,7 @@ def add_message(chat_id):
     }
     
     chats[chat_id].append(user_message)
-    # write_to_csv([chat_id, user_message['timestamp'], user_message['is_ai'], user_message['text']]) # Removed real-time write
+    write_to_csv([chat_id, user_message['timestamp'], user_message['is_ai'], user_message['text']]) # Re-enabled real-time write
     response_messages = [user_message]
     
     ask_ai = request.json.get('ask_ai', False)
@@ -153,7 +145,7 @@ def add_message(chat_id):
             }
             
             chats[chat_id].append(ai_message)
-            # write_to_csv([chat_id, ai_message['timestamp'], ai_message['is_ai'], ai_message['text']]) # Removed real-time write
+            write_to_csv([chat_id, ai_message['timestamp'], ai_message['is_ai'], ai_message['text']]) # Re-enabled real-time write
             response_messages.append(ai_message)
             
         except Exception as e:
