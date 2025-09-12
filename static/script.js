@@ -18,15 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             chats = await response.json();
             renderChatList();
-            if (chats.length > 0) {
-                // Select the first chat by default
-                if (!currentChatId) {
-                    switchChat(chats[0]);
-                }
-            } else {
-                // If there are no chats, create a new one
-                createNewChat();
-            }
+            createNewChat();
         } catch (error) {
             console.error('Error fetching chats:', error);
         }
